@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { Loader2, Mail, Chrome } from 'lucide-react';
 import { z } from 'zod';
+import { sendWelcomeEmail } from '@/lib/emailService';
 
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
@@ -114,6 +115,8 @@ export default function Auth() {
       }
     } else {
       toast.success('Account created! Redirecting to dashboard...');
+      // Send welcome email (fire and forget)
+      sendWelcomeEmail(signupEmail, signupName).catch(console.error);
     }
     setIsSubmitting(false);
   };

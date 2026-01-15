@@ -93,7 +93,7 @@ export default function Index() {
           <div className="flex flex-col items-center text-center max-w-4xl mx-auto fade-in">
             {/* Social Proof */}
             <div className="mb-8">
-              <SocialProofCounter count={247} />
+              <SocialProofCounter />
             </div>
 
             {/* Nate's Photo */}
@@ -123,9 +123,11 @@ export default function Index() {
             </div>
 
             {/* CTA Button */}
-            <Button size="lg" className="glow-button text-lg px-8 py-6 mb-6">
-              Create Account
-            </Button>
+            <Link to="/auth">
+              <Button size="lg" className="glow-button text-lg px-8 py-6 mb-6">
+                Create Account
+              </Button>
+            </Link>
 
             {/* Social Share */}
             <SocialShareButtons />
@@ -233,9 +235,11 @@ export default function Index() {
               ))}
             </div>
 
-            <Button size="lg" className="glow-button">
-              Create Account
-            </Button>
+            <Link to="/auth">
+              <Button size="lg" className="glow-button">
+                Create Account
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -356,9 +360,11 @@ export default function Index() {
               Create your account now to get notified when registration opens, submit talk proposals, and form your hackathon team.
             </p>
             
-            <Button size="lg" className="glow-button text-lg px-8 py-6 mb-6">
-              Create Account
-            </Button>
+            <Link to="/auth">
+              <Button size="lg" className="glow-button text-lg px-8 py-6 mb-6">
+                Create Account
+              </Button>
+            </Link>
 
             <div className="mt-4">
               <SocialShareButtons />

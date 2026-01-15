@@ -1,10 +1,28 @@
+import { useEffect, useState } from 'react';
 import { Users } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
-interface SocialProofCounterProps {
-  count?: number;
-}
+export function SocialProofCounter() {
+  const [count, setCount] = useState<number | null>(null);
 
-export function SocialProofCounter({ count = 247 }: SocialProofCounterProps) {
+  useEffect(() => {
+    const fetchCount = async () => {
+      const { count: userCount, error } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+
+      if (!error && userCount !== null) {
+        setCount(userCount);
+      }
+    };
+
+    fetchCount();
+  }, []);
+
+  if (count === null) {
+    return null;
+  }
+
   return (
     <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2">
       <div className="relative flex items-center justify-center">

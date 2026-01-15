@@ -16,6 +16,10 @@ import Terms from "./pages/Terms";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
+import NewProposal from "./pages/proposals/NewProposal";
+import EditProposal from "./pages/proposals/EditProposal";
+import CreateTeam from "./pages/teams/CreateTeam";
+import TeamDetail from "./pages/teams/TeamDetail";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminProposals from "./pages/admin/AdminProposals";
@@ -38,6 +42,8 @@ const App = () => (
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/speakers" element={<Speakers />} />
             <Route path="/teams" element={<Teams />} />
+            <Route path="/teams/new" element={<CreateTeam />} />
+            <Route path="/teams/:id" element={<TeamDetail />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/code-of-conduct" element={<CodeOfConduct />} />
@@ -46,6 +52,8 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/proposals/new" element={<NewProposal />} />
+            <Route path="/proposals/:id" element={<EditProposal />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/proposals" element={<AdminProposals />} />

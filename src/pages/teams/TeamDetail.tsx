@@ -84,10 +84,10 @@ export default function TeamDetail() {
 
       if (membersError) throw membersError;
 
-      // Fetch profiles for each member
+      // Fetch profiles for each member (use public view for non-sensitive data)
       const memberIds = membersData?.map(m => m.user_id) || [];
       const { data: profilesData } = await supabase
-        .from('profiles')
+        .from('profiles_public')
         .select('user_id, name, photo_url')
         .in('user_id', memberIds);
 

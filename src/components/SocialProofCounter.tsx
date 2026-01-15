@@ -8,7 +8,7 @@ export function SocialProofCounter() {
   useEffect(() => {
     const fetchCount = async () => {
       const { count: userCount, error } = await supabase
-        .from('profiles')
+        .from('profiles_public')
         .select('*', { count: 'exact', head: true });
 
       if (!error && userCount !== null) {

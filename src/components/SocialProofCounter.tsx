@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function SocialProofCounter() {
   const [count, setCount] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchCount = async () => {
@@ -14,10 +16,21 @@ export function SocialProofCounter() {
       if (!error && userCount !== null) {
         setCount(userCount);
       }
+      setIsLoading(false);
     };
 
     fetchCount();
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2">
+        <Skeleton className="w-2 h-2 rounded-full" />
+        <Skeleton className="w-4 h-4 rounded" />
+        <Skeleton className="h-4 w-32" />
+      </div>
+    );
+  }
 
   if (count === null) {
     return null;

@@ -207,7 +207,42 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_public: {
+        Row: {
+          bio: string | null
+          created_at: string | null
+          id: string | null
+          name: string | null
+          photo_url: string | null
+          registration_status: string | null
+          substack_handle: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string | null
+          id?: string | null
+          name?: string | null
+          photo_url?: string | null
+          registration_status?: string | null
+          substack_handle?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string | null
+          id?: string | null
+          name?: string | null
+          photo_url?: string | null
+          registration_status?: string | null
+          substack_handle?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {

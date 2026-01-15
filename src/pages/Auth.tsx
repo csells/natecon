@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +17,8 @@ const passwordSchema = z.string().min(6, 'Password must be at least 6 characters
 
 export default function Auth() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialMode = searchParams.get('mode') === 'login' ? 'login' : 'signup';
   const { user, loading, signInWithGoogle, signInWithMagicLink, signUp, signIn } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
@@ -220,7 +222,7 @@ export default function Auth() {
               </div>
 
               {/* Email/Password Tabs */}
-              <Tabs defaultValue="login" className="w-full">
+              <Tabs defaultValue={initialMode} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="login">Sign In</TabsTrigger>
                   <TabsTrigger value="signup">Sign Up</TabsTrigger>

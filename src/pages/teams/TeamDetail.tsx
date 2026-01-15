@@ -20,6 +20,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { sendTeamJoinedEmail, sendTeamMemberLeftEmail } from '@/lib/emailService';
 
 interface Team {
   id: string;
@@ -141,6 +142,32 @@ export default function TeamDetail() {
       if (error) throw error;
 
       toast.success('You have joined the team!');
+      
+      // Get current user's profile for the notification
+      const { data: joinerProfile } = await supabase
+        .from('profiles')
+        .select('name')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      // Notify team creator about new member
+      if (team?.creator_id && team.creator_id !== user.id) {
+        const { data: creatorProfile } = await supabase
+          .from('profiles')
+          .select('email, name')
+          .eq('user_id', team.creator_id)
+          .maybeSingle();
+        
+        if (creatorProfile?.email) {
+          sendTeamJoinedEmail(
+            creatorProfile.email,
+            creatorProfile.name || 'there',
+            team.name,
+            joinerProfile?.name || 'Someone'
+          ).catch(console.error);
+        }
+      }
+      
       fetchTeamData();
     } catch (error) {
       console.error('Error joining team:', error);
@@ -156,6 +183,13 @@ export default function TeamDetail() {
     setActionLoading(true);
 
     try {
+      // Get current user's profile for notification
+      const { data: leaverProfile } = await supabase
+        .from('profiles')
+        .select('name')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
       const { error } = await supabase
         .from('team_members')
         .delete()
@@ -164,6 +198,25 @@ export default function TeamDetail() {
       if (error) throw error;
 
       toast.success('You have left the team');
+      
+      // Notify team creator about member leaving
+      if (team?.creator_id && team.creator_id !== user.id) {
+        const { data: creatorProfile } = await supabase
+          .from('profiles')
+          .select('email, name')
+          .eq('user_id', team.creator_id)
+          .maybeSingle();
+        
+        if (creatorProfile?.email) {
+          sendTeamMemberLeftEmail(
+            creatorProfile.email,
+            creatorProfile.name || 'there',
+            team.name,
+            leaverProfile?.name || 'A member'
+          ).catch(console.error);
+        }
+      }
+      
       setUserMembership(null);
       fetchTeamData();
     } catch (error) {

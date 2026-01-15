@@ -23,6 +23,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Loader2, ArrowLeft, Check, X } from 'lucide-react';
+import { sendTalkAcceptedEmail, sendTalkRejectedEmail } from '@/lib/emailService';
 
 interface TalkProposal {
   id: string;
@@ -114,11 +115,26 @@ export default function AdminProposals() {
 
       if (error) throw error;
 
+      const proposal = proposals.find(p => p.id === proposalId);
+      
       setProposals((prev) =>
         prev.map((p) => (p.id === proposalId ? { ...p, status: newStatus } : p))
       );
 
       toast.success(`Proposal ${newStatus === 'accepted' ? 'accepted' : 'rejected'}`);
+
+      // Send email notification (fire and forget)
+      if (proposal?.profiles?.email) {
+        const email = proposal.profiles.email;
+        const name = proposal.profiles.name || 'there';
+        const title = proposal.title;
+        
+        if (newStatus === 'accepted') {
+          sendTalkAcceptedEmail(email, name, title).catch(console.error);
+        } else if (newStatus === 'rejected') {
+          sendTalkRejectedEmail(email, name, title).catch(console.error);
+        }
+      }
     } catch (error) {
       console.error('Error updating proposal:', error);
       toast.error('Failed to update proposal');

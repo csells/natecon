@@ -85,9 +85,14 @@ export function Navbar() {
                 </Button>
               </>
             ) : (
-              <Link to="/auth">
-                <Button className="glow-button">Create Account</Button>
-              </Link>
+              <>
+                <Link to="/auth?mode=login">
+                  <Button variant="ghost">Log In</Button>
+                </Link>
+                <Link to="/auth">
+                  <Button className="glow-button">Create Account</Button>
+                </Link>
+              </>
             )}
           </div>
 
@@ -127,9 +132,14 @@ export function Navbar() {
                     </Button>
                   </div>
                 ) : (
-                  <Link to="/auth">
-                    <Button className="w-full glow-button">Create Account</Button>
-                  </Link>
+                  <div className="flex flex-col gap-2">
+                    <Link to="/auth?mode=login">
+                      <Button className="w-full" variant="outline">Log In</Button>
+                    </Link>
+                    <Link to="/auth">
+                      <Button className="w-full glow-button">Create Account</Button>
+                    </Link>
+                  </div>
                 )}
               </div>
             </div>

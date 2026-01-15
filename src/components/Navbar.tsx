@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 import beanieIcon from '@/assets/beanie-icon.webp';
 
 const navLinks = [
@@ -16,6 +17,8 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,6 +32,11 @@ export function Navbar() {
     setIsOpen(false);
   }, [location]);
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -39,7 +47,6 @@ export function Navbar() {
     >
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
             <img
               src={beanieIcon}
@@ -51,7 +58,6 @@ export function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
               <Link
@@ -68,14 +74,23 @@ export function Navbar() {
             ))}
           </div>
 
-          {/* CTA Button */}
-          <div className="hidden md:block">
-            <Button className="glow-button">
-              Create Account
-            </Button>
+          <div className="hidden md:flex items-center gap-2">
+            {user ? (
+              <>
+                <Link to="/dashboard">
+                  <Button variant="ghost">Dashboard</Button>
+                </Link>
+                <Button variant="outline" size="icon" onClick={handleSignOut}>
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </>
+            ) : (
+              <Link to="/auth">
+                <Button className="glow-button">Create Account</Button>
+              </Link>
+            )}
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="md:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
@@ -85,7 +100,6 @@ export function Navbar() {
           </button>
         </div>
 
-        {/* Mobile Navigation */}
         {isOpen && (
           <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-md">
             <div className="py-4 space-y-2">
@@ -103,9 +117,20 @@ export function Navbar() {
                 </Link>
               ))}
               <div className="px-4 pt-4">
-                <Button className="w-full glow-button">
-                  Create Account
-                </Button>
+                {user ? (
+                  <div className="flex gap-2">
+                    <Link to="/dashboard" className="flex-1">
+                      <Button className="w-full" variant="outline">Dashboard</Button>
+                    </Link>
+                    <Button variant="outline" size="icon" onClick={handleSignOut}>
+                      <LogOut className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Link to="/auth">
+                    <Button className="w-full glow-button">Create Account</Button>
+                  </Link>
+                )}
               </div>
             </div>
           </div>

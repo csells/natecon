@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Users, Loader2, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -105,8 +107,13 @@ export default function Speakers() {
                     Speakers Coming Soon
                   </h2>
                   <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                    We're reviewing talk proposals now. Create an account to submit your own talk and be featured here!
+                    We're reviewing talk proposals now. Submit your own talk and be featured here!
                   </p>
+                  <Link to="/proposals/new">
+                    <Button size="lg" className="glow-button mb-6">
+                      Submit Your Talk!
+                    </Button>
+                  </Link>
                   <p className="text-sm text-muted-foreground">
                     Accepted speakers will be announced as proposals are reviewed.
                   </p>

@@ -3,7 +3,8 @@ import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Coffee, Utensils, Clock, Loader2, Mic } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Coffee, Utensils, Clock, Loader2, Mic, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface AcceptedTalk {
@@ -238,20 +239,36 @@ export default function Schedule() {
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
             ) : (
-              <div className="space-y-8">
-                <ScheduleDay 
-                  title="Day 1 — Talks & Panels" 
-                  date="March 14, 2026" 
-                  schedule={dayOneSchedule}
-                  lightningTalks={lightningTalks}
-                  fullTalks={fullTalks}
-                />
-                <ScheduleDay 
-                  title="Day 2 — Nateathon Hackathon" 
-                  date="March 15, 2026" 
-                  schedule={dayTwoSchedule}
-                />
-              </div>
+              <Tabs defaultValue="day1" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-8">
+                  <TabsTrigger value="day1" className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Day 1 — Talks
+                  </TabsTrigger>
+                  <TabsTrigger value="day2" className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Day 2 — Hackathon
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="day1">
+                  <ScheduleDay 
+                    title="Day 1 — Talks & Panels" 
+                    date="March 14, 2026" 
+                    schedule={dayOneSchedule}
+                    lightningTalks={lightningTalks}
+                    fullTalks={fullTalks}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="day2">
+                  <ScheduleDay 
+                    title="Day 2 — Nateathon Hackathon" 
+                    date="March 15, 2026" 
+                    schedule={dayTwoSchedule}
+                  />
+                </TabsContent>
+              </Tabs>
             )}
 
             <div className="mt-12 text-center">

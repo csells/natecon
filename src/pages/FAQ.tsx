@@ -39,7 +39,7 @@ const faqs = [
   },
   {
     question: 'Where exactly is the venue?',
-    answer: 'NateCon 2026 will be held at the New Relic offices in San Francisco. Exact address and parking/transit info will be shared closer to the event.',
+    answer: 'NateCon 2026 will be held in San Francisco. The exact venue is TBD — address and parking/transit info will be shared once confirmed.',
   },
   {
     question: 'What are the hackathon prize categories?',

@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      email_rate_limits: {
+        Row: {
+          email_type: string
+          id: string
+          recipient: string
+          sent_at: string
+          user_id: string
+        }
+        Insert: {
+          email_type: string
+          id?: string
+          recipient: string
+          sent_at?: string
+          user_id: string
+        }
+        Update: {
+          email_type?: string
+          id?: string
+          recipient?: string
+          sent_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           bio: string | null
@@ -245,6 +269,7 @@ export type Database = {
       }
     }
     Functions: {
+      cleanup_old_email_rate_limits: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

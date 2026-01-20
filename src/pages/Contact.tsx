@@ -91,7 +91,7 @@ export default function Contact() {
                 Questions? Ideas? We'd love to hear from you.
               </p>
               <p className="text-sm text-muted-foreground">
-                Your message will go to <span className="text-foreground font-medium">Chris Sells</span>, the conference organizer.
+                Your message will go to <a href="https://sellsbrothers.com" target="_blank" rel="noopener noreferrer" className="text-foreground font-medium hover:text-primary underline underline-offset-2">Chris Sells</a>, the conference organizer.
                 <br />
                 <span className="italic">(Nate's busy writing his keynote!)</span>
               </p>

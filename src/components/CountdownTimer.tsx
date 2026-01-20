@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { PartyPopper } from 'lucide-react';
 
 interface TimeLeft {
   days: number;
@@ -8,15 +9,33 @@ interface TimeLeft {
 }
 
 // Target: March 14, 2026 at 9:00 AM Pacific Time
-const TARGET_DATE = new Date('2026-03-14T09:00:00-08:00');
+const EVENT_START_DATE = new Date('2026-03-14T09:00:00-08:00');
+// Event ends March 15, 2026 at 6:00 PM Pacific Time
+const EVENT_END_DATE = new Date('2026-03-15T18:00:00-08:00');
 
 export function CountdownTimer() {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [eventStatus, setEventStatus] = useState<'upcoming' | 'happening' | 'concluded'>('upcoming');
 
   useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date();
-      const difference = TARGET_DATE.getTime() - now.getTime();
+      
+      // Check if event has concluded
+      if (now >= EVENT_END_DATE) {
+        setEventStatus('concluded');
+        return;
+      }
+      
+      // Check if event is happening now
+      if (now >= EVENT_START_DATE && now < EVENT_END_DATE) {
+        setEventStatus('happening');
+        return;
+      }
+      
+      // Event is upcoming - calculate countdown
+      setEventStatus('upcoming');
+      const difference = EVENT_START_DATE.getTime() - now.getTime();
 
       if (difference > 0) {
         const days = Math.floor(difference / (1000 * 60 * 60 * 24));
@@ -33,6 +52,44 @@ export function CountdownTimer() {
     return () => clearInterval(timer);
   }, []);
 
+  // Post-event state
+  if (eventStatus === 'concluded') {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-6">
+        <PartyPopper className="w-12 h-12 text-primary animate-bounce" />
+        <div className="text-center">
+          <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+            Event Concluded
+          </h3>
+          <p className="text-lg text-muted-foreground">
+            See you next year! 🎉
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Event happening now state
+  if (eventStatus === 'happening') {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-6">
+        <div className="relative">
+          <span className="absolute w-4 h-4 rounded-full bg-green-500 animate-ping"></span>
+          <span className="relative w-4 h-4 rounded-full bg-green-500 block"></span>
+        </div>
+        <div className="text-center">
+          <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+            Happening Now!
+          </h3>
+          <p className="text-lg text-muted-foreground">
+            NateCon 2026 is live 🚀
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Countdown state
   const timeBlocks = [
     { label: 'Days', value: timeLeft.days },
     { label: 'Hours', value: timeLeft.hours },

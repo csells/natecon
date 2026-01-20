@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { Loader2, Mail, Chrome } from 'lucide-react';
+import { Loader2, Mail, Chrome, CheckCircle2, XCircle } from 'lucide-react';
 import { z } from 'zod';
 import { sendWelcomeEmail } from '@/lib/emailService';
 
@@ -16,6 +16,18 @@ const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 
 const PASSWORD_REQUIREMENTS = 'Minimum 6 characters';
+
+// Email validation helper with inline feedback
+function useEmailValidation(email: string) {
+  return useMemo(() => {
+    if (!email) return { isValid: null, message: '' };
+    const result = emailSchema.safeParse(email);
+    if (result.success) {
+      return { isValid: true, message: 'Valid email' };
+    }
+    return { isValid: false, message: result.error.errors[0].message };
+  }, [email]);
+}
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -32,6 +44,11 @@ export default function Auth() {
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const [magicLinkEmail, setMagicLinkEmail] = useState('');
+
+  // Inline email validation
+  const loginEmailValidation = useEmailValidation(loginEmail);
+  const signupEmailValidation = useEmailValidation(signupEmail);
+  const magicLinkEmailValidation = useEmailValidation(magicLinkEmail);
 
   useEffect(() => {
     if (!loading && user) {
@@ -181,15 +198,27 @@ export default function Auth() {
                   <div className="space-y-2">
                     <Label htmlFor="magic-email">Magic Link (passwordless)</Label>
                     <div className="flex gap-2">
-                      <Input
-                        id="magic-email"
-                        type="email"
-                        placeholder="you@example.com"
-                        value={magicLinkEmail}
-                        onChange={(e) => setMagicLinkEmail(e.target.value)}
-                        required
-                      />
-                      <Button type="submit" disabled={isSubmitting} size="icon" aria-label="Send magic link">
+                      <div className="flex-1 relative">
+                        <Input
+                          id="magic-email"
+                          type="email"
+                          placeholder="you@example.com"
+                          value={magicLinkEmail}
+                          onChange={(e) => setMagicLinkEmail(e.target.value)}
+                          className={magicLinkEmail && magicLinkEmailValidation.isValid === false ? 'border-destructive' : magicLinkEmail && magicLinkEmailValidation.isValid ? 'border-green-500' : ''}
+                          required
+                        />
+                        {magicLinkEmail && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            {magicLinkEmailValidation.isValid ? (
+                              <CheckCircle2 className="w-4 h-4 text-green-500" />
+                            ) : (
+                              <XCircle className="w-4 h-4 text-destructive" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <Button type="submit" disabled={isSubmitting || magicLinkEmailValidation.isValid === false} size="icon" aria-label="Send magic link">
                         {isSubmitting ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
@@ -197,6 +226,9 @@ export default function Auth() {
                         )}
                       </Button>
                     </div>
+                    {magicLinkEmail && magicLinkEmailValidation.isValid === false && (
+                      <p className="text-xs text-destructive">{magicLinkEmailValidation.message}</p>
+                    )}
                   </div>
                 </form>
               ) : (
@@ -234,14 +266,29 @@ export default function Auth() {
                   <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="login-email">Email</Label>
-                      <Input
-                        id="login-email"
-                        type="email"
-                        placeholder="you@example.com"
-                        value={loginEmail}
-                        onChange={(e) => setLoginEmail(e.target.value)}
-                        required
-                      />
+                      <div className="relative">
+                        <Input
+                          id="login-email"
+                          type="email"
+                          placeholder="you@example.com"
+                          value={loginEmail}
+                          onChange={(e) => setLoginEmail(e.target.value)}
+                          className={loginEmail && loginEmailValidation.isValid === false ? 'border-destructive pr-10' : loginEmail && loginEmailValidation.isValid ? 'border-green-500 pr-10' : ''}
+                          required
+                        />
+                        {loginEmail && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            {loginEmailValidation.isValid ? (
+                              <CheckCircle2 className="w-4 h-4 text-green-500" />
+                            ) : (
+                              <XCircle className="w-4 h-4 text-destructive" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {loginEmail && loginEmailValidation.isValid === false && (
+                        <p className="text-xs text-destructive">{loginEmailValidation.message}</p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="login-password">Password</Label>
@@ -254,7 +301,7 @@ export default function Auth() {
                         required
                       />
                     </div>
-                    <Button type="submit" disabled={isSubmitting} className="w-full glow-button">
+                    <Button type="submit" disabled={isSubmitting || loginEmailValidation.isValid === false} className="w-full glow-button">
                       {isSubmitting ? (
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       ) : null}
@@ -277,14 +324,29 @@ export default function Auth() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="signup-email">Email</Label>
-                      <Input
-                        id="signup-email"
-                        type="email"
-                        placeholder="you@example.com"
-                        value={signupEmail}
-                        onChange={(e) => setSignupEmail(e.target.value)}
-                        required
-                      />
+                      <div className="relative">
+                        <Input
+                          id="signup-email"
+                          type="email"
+                          placeholder="you@example.com"
+                          value={signupEmail}
+                          onChange={(e) => setSignupEmail(e.target.value)}
+                          className={signupEmail && signupEmailValidation.isValid === false ? 'border-destructive pr-10' : signupEmail && signupEmailValidation.isValid ? 'border-green-500 pr-10' : ''}
+                          required
+                        />
+                        {signupEmail && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            {signupEmailValidation.isValid ? (
+                              <CheckCircle2 className="w-4 h-4 text-green-500" />
+                            ) : (
+                              <XCircle className="w-4 h-4 text-destructive" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {signupEmail && signupEmailValidation.isValid === false && (
+                        <p className="text-xs text-destructive">{signupEmailValidation.message}</p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="signup-password">Password</Label>
@@ -301,7 +363,7 @@ export default function Auth() {
                         {PASSWORD_REQUIREMENTS}
                       </p>
                     </div>
-                    <Button type="submit" disabled={isSubmitting} className="w-full glow-button">
+                    <Button type="submit" disabled={isSubmitting || signupEmailValidation.isValid === false} className="w-full glow-button">
                       {isSubmitting ? (
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       ) : null}

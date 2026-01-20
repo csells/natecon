@@ -15,6 +15,8 @@ import { sendWelcomeEmail } from '@/lib/emailService';
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 
+const PASSWORD_REQUIREMENTS = 'Minimum 6 characters';
+
 export default function Auth() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -187,7 +189,7 @@ export default function Auth() {
                         onChange={(e) => setMagicLinkEmail(e.target.value)}
                         required
                       />
-                      <Button type="submit" disabled={isSubmitting} size="icon">
+                      <Button type="submit" disabled={isSubmitting} size="icon" aria-label="Send magic link">
                         {isSubmitting ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
@@ -293,7 +295,11 @@ export default function Auth() {
                         value={signupPassword}
                         onChange={(e) => setSignupPassword(e.target.value)}
                         required
+                        aria-describedby="password-requirements"
                       />
+                      <p id="password-requirements" className="text-xs text-muted-foreground">
+                        {PASSWORD_REQUIREMENTS}
+                      </p>
                     </div>
                     <Button type="submit" disabled={isSubmitting} className="w-full glow-button">
                       {isSubmitting ? (

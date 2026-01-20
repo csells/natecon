@@ -3,6 +3,7 @@ import { Layout } from '@/components/Layout';
 import { CountdownTimer } from '@/components/CountdownTimer';
 import { SocialProofCounter } from '@/components/SocialProofCounter';
 import { SocialShareButtons } from '@/components/SocialShareButtons';
+import { TalkDeadlineCountdown } from '@/components/TalkDeadlineCountdown';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
@@ -22,7 +23,10 @@ import {
   MessageSquarePlus,
   UsersRound,
   Search,
-  ChevronRight
+  ChevronRight,
+  Scale,
+  FileCode,
+  Award
 } from 'lucide-react';
 import natePhoto from '@/assets/nate-photo.webp';
 
@@ -74,6 +78,24 @@ const hackathonPrizes = [
   { category: 'Best AI Agent', emoji: '🤖' },
   { category: 'Best AI Tool', emoji: '🛠️' },
   { category: 'Best Overall', emoji: '🏆' },
+];
+
+const hackathonRules = [
+  { 
+    icon: Users, 
+    title: 'Team Size', 
+    description: 'No limits! Solo, duo, or bring an army — your call.' 
+  },
+  { 
+    icon: FileCode, 
+    title: 'Pre-built Code', 
+    description: 'Totally allowed. Just mention what you started with during your demo.' 
+  },
+  { 
+    icon: Award, 
+    title: 'Judging Criteria', 
+    description: 'Audience vibes via the applause-o-meter, plus the whims of Nate himself.' 
+  },
 ];
 
 const whatToBring = [
@@ -284,20 +306,31 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Hackathon Section */}
+      {/* Talk Submission Deadline */}
       <section className="section-padding bg-card/50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center">
+          <div className="max-w-xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-8">
+              Want to Speak?
+            </h2>
+            <TalkDeadlineCountdown />
+          </div>
+        </div>
+      </section>
+
+      {/* Hackathon Section */}
+      <section className="section-padding">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               <span className="text-gradient">Nateathon</span> Hackathon
             </h2>
             <p className="text-xl text-muted-foreground mb-8">Day 2 — Sunday, March 15</p>
             
+            {/* Prizes */}
             <Card className="bg-card border-border mb-8">
               <CardContent className="p-6 md:p-8">
-                <p className="text-lg text-foreground mb-6 italic">
-                  "First rule: there are no rules!"
-                </p>
+                <h3 className="text-lg font-semibold text-foreground mb-4">Prizes</h3>
                 
                 <div className="grid sm:grid-cols-3 gap-4 mb-6">
                   {hackathonPrizes.map((prize) => (
@@ -312,8 +345,31 @@ export default function Index() {
                 </div>
 
                 <p className="text-muted-foreground text-sm">
-                  3-minute demos in the afternoon • Judged by applause-o-meter + Nate
+                  3-minute demos in the afternoon
                 </p>
+              </CardContent>
+            </Card>
+
+            {/* Rules */}
+            <Card className="bg-card border-border mb-8">
+              <CardContent className="p-6 md:p-8">
+                <h3 className="text-lg font-semibold text-foreground mb-6">
+                  "The Rules" <span className="text-muted-foreground font-normal">(there aren't many)</span>
+                </h3>
+                
+                <div className="grid sm:grid-cols-3 gap-6 text-left">
+                  {hackathonRules.map((rule) => (
+                    <div key={rule.title} className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <rule.icon className="w-4 h-4 text-primary" />
+                        </div>
+                        <span className="font-medium text-foreground">{rule.title}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{rule.description}</p>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
 

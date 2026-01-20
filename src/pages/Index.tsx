@@ -40,7 +40,7 @@ const eventHighlights = [
   {
     icon: MapPin,
     title: 'San Francisco',
-    description: 'New Relic offices — venue details coming soon',
+    description: 'Venue TBD — details coming soon',
   },
   {
     icon: DollarSign,

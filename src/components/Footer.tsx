@@ -132,20 +132,9 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Venue Credit & Copyright */}
+        {/* Copyright */}
         <div className="mt-12 pt-8 border-t border-border">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">
-              Venue generously provided by{' '}
-              <a
-                href="https://newrelic.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                New Relic
-              </a>
-            </p>
+          <div className="flex flex-col md:flex-row items-center justify-center">
             <p className="text-sm text-muted-foreground flex items-center gap-1">
               Made with <Heart className="w-4 h-4 text-primary" /> for the Nate community
             </p>

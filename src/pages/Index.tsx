@@ -6,6 +6,7 @@ import { SocialShareButtons } from '@/components/SocialShareButtons';
 import { TalkDeadlineCountdown } from '@/components/TalkDeadlineCountdown';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { useAuth } from '@/hooks/useAuth';
 import { 
   Calendar, 
   MapPin, 
@@ -105,6 +106,8 @@ const whatToBring = [
 ];
 
 export default function Index() {
+  const { user } = useAuth();
+
   return (
     <Layout>
       {/* Hero Section */}
@@ -145,11 +148,13 @@ export default function Index() {
             </div>
 
             {/* CTA Button */}
-            <Link to="/auth">
-              <Button size="lg" className="glow-button text-lg px-8 py-6 mb-6">
-                Create Account
-              </Button>
-            </Link>
+            {!user && (
+              <Link to="/auth">
+                <Button size="lg" className="glow-button text-lg px-8 py-6 mb-6">
+                  Create Account
+                </Button>
+              </Link>
+            )}
 
             {/* Social Share */}
             <SocialShareButtons />
@@ -257,11 +262,13 @@ export default function Index() {
               ))}
             </div>
 
-            <Link to="/auth">
-              <Button size="lg" className="glow-button">
-                Create Account
-              </Button>
-            </Link>
+            {!user && (
+              <Link to="/auth">
+                <Button size="lg" className="glow-button">
+                  Create Account
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </section>
@@ -416,11 +423,13 @@ export default function Index() {
               Create your account now to get notified when registration opens, submit talk proposals, and form your hackathon team.
             </p>
             
-            <Link to="/auth">
-              <Button size="lg" className="glow-button text-lg px-8 py-6 mb-6">
-                Create Account
-              </Button>
-            </Link>
+            {!user && (
+              <Link to="/auth">
+                <Button size="lg" className="glow-button text-lg px-8 py-6 mb-6">
+                  Create Account
+                </Button>
+              </Link>
+            )}
 
             <div className="mt-4">
               <SocialShareButtons />

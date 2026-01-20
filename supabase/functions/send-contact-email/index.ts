@@ -3,7 +3,7 @@ import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const CONTACT_EMAIL = "csells@sellsbrothers.com";
-const FROM_EMAIL = "NateCon <hello@natejonesdon.com>";
+const FROM_EMAIL = "NateCon <hello@natejonescon.com>";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

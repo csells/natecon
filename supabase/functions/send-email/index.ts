@@ -29,14 +29,31 @@ interface EmailRequest {
   };
 }
 
+// Escape HTML entities to prevent XSS attacks in email templates
+function escapeHtml(unsafe: string | undefined | null): string {
+  if (!unsafe) return "";
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function getEmailContent(type: EmailType, data: EmailRequest["data"] = {}) {
+  // Sanitize all user-provided data before using in templates
+  const safeName = escapeHtml(data.name) || "there";
+  const safeTalkTitle = escapeHtml(data.talkTitle);
+  const safeTeamName = escapeHtml(data.teamName);
+  const safeMemberName = escapeHtml(data.memberName);
+
   const templates: Record<EmailType, { subject: string; html: string }> = {
     welcome: {
       subject: "Welcome to NateCon 2026! 🎉",
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #1a1a1a;">Welcome to NateCon 2026!</h1>
-          <p>Hi ${data.name || "there"},</p>
+          <p>Hi ${safeName},</p>
           <p>Thanks for signing up for NateCon 2026! We're excited to have you join our community of writers and creators.</p>
           <p>Here's what you can do now:</p>
           <ul>
@@ -55,8 +72,8 @@ function getEmailContent(type: EmailType, data: EmailRequest["data"] = {}) {
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #1a1a1a;">Congratulations! 🎉</h1>
-          <p>Hi ${data.name || "there"},</p>
-          <p>Great news! Your talk proposal <strong>"${data.talkTitle}"</strong> has been accepted for NateCon 2026!</p>
+          <p>Hi ${safeName},</p>
+          <p>Great news! Your talk proposal <strong>"${safeTalkTitle}"</strong> has been accepted for NateCon 2026!</p>
           <p>We'll be in touch soon with more details about scheduling and logistics.</p>
           <p>Thank you for contributing to NateCon 2026!</p>
           <p style="color: #666;">— The NateCon Team</p>
@@ -68,8 +85,8 @@ function getEmailContent(type: EmailType, data: EmailRequest["data"] = {}) {
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #1a1a1a;">Thank You for Your Submission</h1>
-          <p>Hi ${data.name || "there"},</p>
-          <p>Thank you for submitting your talk proposal <strong>"${data.talkTitle}"</strong> for NateCon 2026.</p>
+          <p>Hi ${safeName},</p>
+          <p>Thank you for submitting your talk proposal <strong>"${safeTalkTitle}"</strong> for NateCon 2026.</p>
           <p>Unfortunately, we weren't able to include it in this year's program. We received many excellent proposals and had to make difficult decisions.</p>
           <p>We hope you'll still join us at NateCon 2026 and consider submitting again in the future!</p>
           <p style="color: #666;">— The NateCon Team</p>
@@ -81,8 +98,8 @@ function getEmailContent(type: EmailType, data: EmailRequest["data"] = {}) {
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #1a1a1a;">New Team Member!</h1>
-          <p>Hi ${data.name || "there"},</p>
-          <p>Great news! <strong>${data.memberName}</strong> has joined your team <strong>"${data.teamName}"</strong> for NateCon 2026!</p>
+          <p>Hi ${safeName},</p>
+          <p>Great news! <strong>${safeMemberName}</strong> has joined your team <strong>"${safeTeamName}"</strong> for NateCon 2026!</p>
           <p>Head over to your dashboard to see your full team and start collaborating.</p>
           <p style="color: #666;">— The NateCon Team</p>
         </div>
@@ -93,8 +110,8 @@ function getEmailContent(type: EmailType, data: EmailRequest["data"] = {}) {
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #1a1a1a;">Team Update</h1>
-          <p>Hi ${data.name || "there"},</p>
-          <p><strong>${data.memberName}</strong> has left your team <strong>"${data.teamName}"</strong>.</p>
+          <p>Hi ${safeName},</p>
+          <p><strong>${safeMemberName}</strong> has left your team <strong>"${safeTeamName}"</strong>.</p>
           <p>You can invite new members from your dashboard.</p>
           <p style="color: #666;">— The NateCon Team</p>
         </div>
@@ -105,7 +122,7 @@ function getEmailContent(type: EmailType, data: EmailRequest["data"] = {}) {
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #1a1a1a;">Registration is Open! 🎟️</h1>
-          <p>Hi ${data.name || "there"},</p>
+          <p>Hi ${safeName},</p>
           <p>The moment you've been waiting for is here! Registration for NateCon 2026 is now open.</p>
           <p>Secure your spot today and join us for an incredible experience!</p>
           <p><a href="#" style="display: inline-block; background: #1a1a1a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Register Now</a></p>

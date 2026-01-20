@@ -87,8 +87,13 @@ export default function Contact() {
               <h1 className="text-4xl md:text-5xl font-bold mb-4">
                 Contact Us
               </h1>
-              <p className="text-xl text-muted-foreground">
+              <p className="text-xl text-muted-foreground mb-2">
                 Questions? Ideas? We'd love to hear from you.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Your message will go to <span className="text-foreground font-medium">Chris Sells</span>, the conference organizer.
+                <br />
+                <span className="italic">(Nate's busy writing his keynote!)</span>
               </p>
             </div>
 

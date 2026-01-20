@@ -44,7 +44,7 @@ export function SocialProofCounter() {
       </div>
       <Users className="w-4 h-4 text-primary" />
       <span className="text-sm font-medium text-foreground">
-        <span className="text-primary font-bold">{count.toLocaleString()}</span> people interested
+        <span className="text-primary font-bold">{count.toLocaleString()}</span> people signed up
       </span>
     </div>
   );

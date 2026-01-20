@@ -8,14 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { Loader2, Mail, Chrome, CheckCircle2, XCircle } from 'lucide-react';
+import { Loader2, Mail, Chrome, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
 import { z } from 'zod';
 import { sendWelcomeEmail } from '@/lib/emailService';
+import { PasswordStrengthIndicator } from '@/components/PasswordStrengthIndicator';
 
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
-
-const PASSWORD_REQUIREMENTS = 'Minimum 6 characters';
 
 // Email validation helper with inline feedback
 function useEmailValidation(email: string) {
@@ -33,9 +32,11 @@ export default function Auth() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialMode = searchParams.get('mode') === 'login' ? 'login' : 'signup';
-  const { user, loading, signInWithGoogle, signInWithMagicLink, signUp, signIn } = useAuth();
+  const { user, loading, signInWithGoogle, signInWithMagicLink, signUp, signIn, resetPassword } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmailSent, setResetEmailSent] = useState(false);
 
   // Form states
   const [loginEmail, setLoginEmail] = useState('');
@@ -44,11 +45,13 @@ export default function Auth() {
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const [magicLinkEmail, setMagicLinkEmail] = useState('');
+  const [resetEmail, setResetEmail] = useState('');
 
   // Inline email validation
   const loginEmailValidation = useEmailValidation(loginEmail);
   const signupEmailValidation = useEmailValidation(signupEmail);
   const magicLinkEmailValidation = useEmailValidation(magicLinkEmail);
+  const resetEmailValidation = useEmailValidation(resetEmail);
 
   useEffect(() => {
     if (!loading && user) {
@@ -142,12 +145,128 @@ export default function Auth() {
     setIsSubmitting(false);
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      emailSchema.parse(resetEmail);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+        return;
+      }
+    }
+
+    setIsSubmitting(true);
+    const { error } = await resetPassword(resetEmail);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      setResetEmailSent(true);
+      toast.success('Password reset email sent!');
+    }
+    setIsSubmitting(false);
+  };
+
   if (loading) {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
+      </Layout>
+    );
+  }
+
+  // Forgot Password View
+  if (showForgotPassword) {
+    return (
+      <Layout>
+        <section className="section-padding min-h-screen flex items-center justify-center">
+          <div className="container mx-auto px-4 max-w-md">
+            <Card className="bg-card border-border">
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl font-bold">Reset Password</CardTitle>
+                <CardDescription>
+                  Enter your email and we'll send you a link to reset your password
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {!resetEmailSent ? (
+                  <form onSubmit={handleForgotPassword} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="reset-email">Email</Label>
+                      <div className="relative">
+                        <Input
+                          id="reset-email"
+                          type="email"
+                          placeholder="you@example.com"
+                          value={resetEmail}
+                          onChange={(e) => setResetEmail(e.target.value)}
+                          className={resetEmail && resetEmailValidation.isValid === false ? 'border-destructive pr-10' : resetEmail && resetEmailValidation.isValid ? 'border-green-500 pr-10' : ''}
+                          required
+                        />
+                        {resetEmail && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            {resetEmailValidation.isValid ? (
+                              <CheckCircle2 className="w-4 h-4 text-green-500" />
+                            ) : (
+                              <XCircle className="w-4 h-4 text-destructive" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {resetEmail && resetEmailValidation.isValid === false && (
+                        <p className="text-xs text-destructive">{resetEmailValidation.message}</p>
+                      )}
+                    </div>
+                    <Button 
+                      type="submit" 
+                      disabled={isSubmitting || resetEmailValidation.isValid === false} 
+                      className="w-full glow-button"
+                    >
+                      {isSubmitting ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Mail className="w-4 h-4 mr-2" />
+                      )}
+                      Send Reset Link
+                    </Button>
+                  </form>
+                ) : (
+                  <div className="text-center p-4 bg-primary/10 rounded-lg">
+                    <Mail className="w-8 h-8 mx-auto mb-2 text-primary" />
+                    <p className="text-sm text-foreground">
+                      Check your email for the password reset link!
+                    </p>
+                    <button
+                      onClick={() => {
+                        setResetEmailSent(false);
+                        setResetEmail('');
+                      }}
+                      className="text-xs text-primary hover:underline mt-2"
+                    >
+                      Send another link
+                    </button>
+                  </div>
+                )}
+
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setShowForgotPassword(false);
+                    setResetEmailSent(false);
+                    setResetEmail('');
+                  }}
+                  className="w-full"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Sign In
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
       </Layout>
     );
   }
@@ -307,6 +426,13 @@ export default function Auth() {
                       ) : null}
                       Sign In
                     </Button>
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPassword(true)}
+                      className="w-full text-sm text-primary hover:underline"
+                    >
+                      Forgot your password?
+                    </button>
                   </form>
                 </TabsContent>
 
@@ -357,11 +483,8 @@ export default function Auth() {
                         value={signupPassword}
                         onChange={(e) => setSignupPassword(e.target.value)}
                         required
-                        aria-describedby="password-requirements"
                       />
-                      <p id="password-requirements" className="text-xs text-muted-foreground">
-                        {PASSWORD_REQUIREMENTS}
-                      </p>
+                      <PasswordStrengthIndicator password={signupPassword} />
                     </div>
                     <Button type="submit" disabled={isSubmitting || signupEmailValidation.isValid === false} className="w-full glow-button">
                       {isSubmitting ? (

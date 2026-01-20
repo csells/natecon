@@ -8,10 +8,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { Loader2, Mail, Chrome, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
+import { Loader2, Mail, Chrome, CheckCircle2, XCircle, ArrowLeft, ShieldAlert } from 'lucide-react';
 import { z } from 'zod';
 import { sendWelcomeEmail } from '@/lib/emailService';
 import { PasswordStrengthIndicator } from '@/components/PasswordStrengthIndicator';
+import { PasswordInput } from '@/components/PasswordInput';
+import { useRateLimiter } from '@/hooks/useRateLimiter';
 
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
@@ -37,6 +39,10 @@ export default function Auth() {
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
+
+  // Rate limiters for different forms
+  const loginRateLimiter = useRateLimiter({ maxAttempts: 5, windowMs: 60000, lockoutMs: 30000 });
+  const resetRateLimiter = useRateLimiter({ maxAttempts: 3, windowMs: 60000, lockoutMs: 60000 });
 
   // Form states
   const [loginEmail, setLoginEmail] = useState('');
@@ -93,6 +99,13 @@ export default function Auth() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Check rate limit
+    const rateCheck = loginRateLimiter.checkAndRecord();
+    if (!rateCheck.allowed) {
+      toast.error(rateCheck.message);
+      return;
+    }
     
     try {
       emailSchema.parse(loginEmail);
@@ -112,6 +125,9 @@ export default function Auth() {
       } else {
         toast.error(error.message);
       }
+    } else {
+      // Reset rate limiter on successful login
+      loginRateLimiter.reset();
     }
     setIsSubmitting(false);
   };
@@ -147,6 +163,13 @@ export default function Auth() {
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Check rate limit
+    const rateCheck = resetRateLimiter.checkAndRecord();
+    if (!rateCheck.allowed) {
+      toast.error(rateCheck.message);
+      return;
+    }
     
     try {
       emailSchema.parse(resetEmail);
@@ -192,6 +215,13 @@ export default function Auth() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                {resetRateLimiter.isLocked && (
+                  <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
+                    <ShieldAlert className="w-4 h-4 flex-shrink-0" />
+                    <span>Too many attempts. Wait {resetRateLimiter.lockoutSecondsRemaining}s</span>
+                  </div>
+                )}
+
                 {!resetEmailSent ? (
                   <form onSubmit={handleForgotPassword} className="space-y-4">
                     <div className="space-y-2">
@@ -205,6 +235,7 @@ export default function Auth() {
                           onChange={(e) => setResetEmail(e.target.value)}
                           className={resetEmail && resetEmailValidation.isValid === false ? 'border-destructive pr-10' : resetEmail && resetEmailValidation.isValid ? 'border-green-500 pr-10' : ''}
                           required
+                          disabled={resetRateLimiter.isLocked}
                         />
                         {resetEmail && (
                           <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -222,7 +253,7 @@ export default function Auth() {
                     </div>
                     <Button 
                       type="submit" 
-                      disabled={isSubmitting || resetEmailValidation.isValid === false} 
+                      disabled={isSubmitting || resetEmailValidation.isValid === false || resetRateLimiter.isLocked} 
                       className="w-full glow-button"
                     >
                       {isSubmitting ? (
@@ -382,6 +413,13 @@ export default function Auth() {
                 </TabsList>
 
                 <TabsContent value="login" className="space-y-4 mt-4">
+                  {loginRateLimiter.isLocked && (
+                    <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
+                      <ShieldAlert className="w-4 h-4 flex-shrink-0" />
+                      <span>Too many attempts. Wait {loginRateLimiter.lockoutSecondsRemaining}s</span>
+                    </div>
+                  )}
+
                   <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="login-email">Email</Label>
@@ -394,6 +432,7 @@ export default function Auth() {
                           onChange={(e) => setLoginEmail(e.target.value)}
                           className={loginEmail && loginEmailValidation.isValid === false ? 'border-destructive pr-10' : loginEmail && loginEmailValidation.isValid ? 'border-green-500 pr-10' : ''}
                           required
+                          disabled={loginRateLimiter.isLocked}
                         />
                         {loginEmail && (
                           <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -411,16 +450,20 @@ export default function Auth() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="login-password">Password</Label>
-                      <Input
+                      <PasswordInput
                         id="login-password"
-                        type="password"
                         placeholder="••••••••"
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
                         required
+                        disabled={loginRateLimiter.isLocked}
                       />
                     </div>
-                    <Button type="submit" disabled={isSubmitting || loginEmailValidation.isValid === false} className="w-full glow-button">
+                    <Button 
+                      type="submit" 
+                      disabled={isSubmitting || loginEmailValidation.isValid === false || loginRateLimiter.isLocked} 
+                      className="w-full glow-button"
+                    >
                       {isSubmitting ? (
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       ) : null}
@@ -476,9 +519,8 @@ export default function Auth() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="signup-password">Password</Label>
-                      <Input
+                      <PasswordInput
                         id="signup-password"
-                        type="password"
                         placeholder="••••••••"
                         value={signupPassword}
                         onChange={(e) => setSignupPassword(e.target.value)}

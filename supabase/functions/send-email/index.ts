@@ -29,6 +29,16 @@ interface EmailRequest {
   };
 }
 
+// Rate limits per email type (per user)
+const RATE_LIMITS: Record<EmailType, { maxPerHour: number; maxPerDay: number }> = {
+  welcome: { maxPerHour: 2, maxPerDay: 5 },
+  team_joined: { maxPerHour: 10, maxPerDay: 50 },
+  team_member_left: { maxPerHour: 10, maxPerDay: 50 },
+  talk_accepted: { maxPerHour: 100, maxPerDay: 500 }, // Admin only - higher limits
+  talk_rejected: { maxPerHour: 100, maxPerDay: 500 }, // Admin only - higher limits
+  registration_open: { maxPerHour: 5, maxPerDay: 10 },
+};
+
 // Escape HTML entities to prevent XSS attacks in email templates
 function escapeHtml(unsafe: string | undefined | null): string {
   if (!unsafe) return "";
@@ -38,6 +48,85 @@ function escapeHtml(unsafe: string | undefined | null): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+// Check rate limits and return whether the request is allowed
+async function checkRateLimit(
+  supabase: any,
+  userId: string,
+  emailType: EmailType
+): Promise<{ allowed: boolean; message?: string }> {
+  const limits = RATE_LIMITS[emailType];
+  if (!limits) {
+    return { allowed: true };
+  }
+
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+  // Check hourly limit
+  const { count: hourlyCount, error: hourlyError } = await supabase
+    .from("email_rate_limits")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("email_type", emailType)
+    .gte("sent_at", oneHourAgo);
+
+  if (hourlyError) {
+    console.error("Error checking hourly rate limit:", hourlyError);
+    // Allow on error to not block legitimate emails
+    return { allowed: true };
+  }
+
+  if ((hourlyCount ?? 0) >= limits.maxPerHour) {
+    return { 
+      allowed: false, 
+      message: `Rate limit exceeded: Maximum ${limits.maxPerHour} ${emailType} emails per hour` 
+    };
+  }
+
+  // Check daily limit
+  const { count: dailyCount, error: dailyError } = await supabase
+    .from("email_rate_limits")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("email_type", emailType)
+    .gte("sent_at", oneDayAgo);
+
+  if (dailyError) {
+    console.error("Error checking daily rate limit:", dailyError);
+    return { allowed: true };
+  }
+
+  if ((dailyCount ?? 0) >= limits.maxPerDay) {
+    return { 
+      allowed: false, 
+      message: `Rate limit exceeded: Maximum ${limits.maxPerDay} ${emailType} emails per day` 
+    };
+  }
+
+  return { allowed: true };
+}
+
+// Record email send for rate limiting
+async function recordEmailSend(
+  supabase: any,
+  userId: string,
+  emailType: EmailType,
+  recipient: string
+): Promise<void> {
+  const { error } = await supabase
+    .from("email_rate_limits")
+    .insert({
+      user_id: userId,
+      email_type: emailType,
+      recipient: recipient,
+    });
+
+  if (error) {
+    console.error("Error recording email send:", error);
+    // Non-blocking - don't fail the email send if recording fails
+  }
 }
 
 function getEmailContent(type: EmailType, data: EmailRequest["data"] = {}) {
@@ -154,15 +243,15 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Create Supabase client and verify JWT
-    const supabase = createClient(
+    // Create Supabase client with user auth for JWT verification
+    const supabaseUser = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } }
     );
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    const { data: claimsData, error: claimsError } = await supabaseUser.auth.getClaims(token);
 
     if (claimsError || !claimsData?.claims) {
       console.error("JWT verification failed:", claimsError);
@@ -172,7 +261,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const userId = claimsData.claims.sub;
+    const userId = claimsData.claims.sub as string;
     console.log(`Authenticated user: ${userId}`);
 
     const { type, to, data }: EmailRequest = await req.json();
@@ -180,6 +269,22 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!type || !to) {
       throw new Error("Missing required fields: type and to");
+    }
+
+    // Create Supabase client with service role for rate limiting operations
+    const supabaseService = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    // Check rate limits
+    const rateLimitResult = await checkRateLimit(supabaseService, userId, type);
+    if (!rateLimitResult.allowed) {
+      console.warn(`Rate limit exceeded for user ${userId}, email type ${type}`);
+      return new Response(
+        JSON.stringify({ success: false, error: rateLimitResult.message }),
+        { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
     }
 
     const emailContent = getEmailContent(type, data);
@@ -195,6 +300,9 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     console.log("Email sent successfully:", emailResponse);
+
+    // Record email send for rate limiting (non-blocking)
+    await recordEmailSend(supabaseService, userId, type, to);
 
     return new Response(JSON.stringify({ success: true, data: emailResponse }), {
       status: 200,

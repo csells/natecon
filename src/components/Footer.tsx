@@ -43,27 +43,27 @@ export function Footer() {
             </p>
             <div className="flex items-center gap-4">
               <a
-                href="https://twitter.com"
+                href="https://twitter.com/natebentleyjone"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-primary transition-colors"
-                aria-label="Twitter"
+                aria-label="Follow Nate on Twitter"
               >
                 <Twitter className="w-5 h-5" />
               </a>
               <a
-                href="https://linkedin.com"
+                href="https://www.linkedin.com/in/natebentleyjones/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-primary transition-colors"
-                aria-label="LinkedIn"
+                aria-label="Connect with Nate on LinkedIn"
               >
                 <Linkedin className="w-5 h-5" />
               </a>
               <a
                 href="mailto:csells@sellsbrothers.com"
                 className="text-muted-foreground hover:text-primary transition-colors"
-                aria-label="Email"
+                aria-label="Send email to organizers"
               >
                 <Mail className="w-5 h-5" />
               </a>

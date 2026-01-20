@@ -41,8 +41,8 @@ export function SocialShareButtons({
         variant="outline"
         size="icon"
         onClick={shareOnTwitter}
-        className="hover:border-primary hover:text-primary"
-        aria-label="Share on Twitter"
+        className="hover:border-primary hover:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        aria-label="Share NateCon 2026 on Twitter"
       >
         <Twitter className="w-4 h-4" />
       </Button>
@@ -50,8 +50,8 @@ export function SocialShareButtons({
         variant="outline"
         size="icon"
         onClick={shareOnLinkedIn}
-        className="hover:border-primary hover:text-primary"
-        aria-label="Share on LinkedIn"
+        className="hover:border-primary hover:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        aria-label="Share NateCon 2026 on LinkedIn"
       >
         <Linkedin className="w-4 h-4" />
       </Button>
@@ -59,8 +59,8 @@ export function SocialShareButtons({
         variant="outline"
         size="icon"
         onClick={copyLink}
-        className="hover:border-primary hover:text-primary"
-        aria-label="Copy link"
+        className="hover:border-primary hover:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        aria-label={copied ? "Link copied to clipboard" : "Copy link to clipboard"}
       >
         {copied ? <Check className="w-4 h-4 text-primary" /> : <Link2 className="w-4 h-4" />}
       </Button>

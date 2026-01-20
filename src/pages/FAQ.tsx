@@ -11,11 +11,11 @@ import { Link } from 'react-router-dom';
 const faqs = [
   {
     question: 'Can I attend just one day?',
-    answer: 'No, tickets are $100 for both days to keep it simple. This includes all meals, snacks, and drinks for the entire event.',
+    answer: 'No, tickets are $100 for both days to keep it simple. This includes breakfast, lunch, snacks, and drinks for the entire event.',
   },
   {
     question: 'Is food included?',
-    answer: 'Yes! Breakfast, lunch, snacks, and drinks are included both days. We\'ll have options for various dietary restrictions — just let us know when you register.',
+    answer: 'Breakfast, lunch, snacks, and drinks are included both days. Dinner is on your own — explore SF\'s amazing food scene! We\'ll have options for various dietary restrictions — just let us know when you register.',
   },
   {
     question: 'Do I need a team for the hackathon?',

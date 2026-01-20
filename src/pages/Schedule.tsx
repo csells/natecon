@@ -151,7 +151,7 @@ const dayOneSchedule: ScheduleEvent[] = [
   { time: '2:30 PM', title: 'Afternoon Snacks', description: 'Coffee, tea, and treats', type: 'meal' },
   { time: '3:00 PM', title: 'Lightning Talks', description: 'More community presentations', type: 'lightning' },
   { time: '4:00 PM', title: 'Speaker Panel', description: 'Q&A with speakers and Nate', type: 'talk' },
-  { time: '5:00 PM', title: 'Day 1 Wrap-up', description: 'See you tomorrow for the hackathon!', type: 'activity' },
+  { time: '5:00 PM', title: 'Day 1 Wrap-up', description: 'Dinner on your own — explore SF\'s foodie scene!', type: 'activity' },
 ];
 
 const dayTwoSchedule: ScheduleEvent[] = [
@@ -161,7 +161,7 @@ const dayTwoSchedule: ScheduleEvent[] = [
   { time: '2:30 PM', title: 'Afternoon Snacks', description: 'Sugar boost for the final stretch', type: 'meal' },
   { time: '3:30 PM', title: 'Demos Begin', description: '3-minute presentations from each team', type: 'talk' },
   { time: '5:00 PM', title: 'Judging & Awards', description: 'Applause-o-meter + Nate pick the winners', type: 'activity' },
-  { time: '5:30 PM', title: 'Closing Remarks', description: "See you at NateCon 2027!", type: 'activity' },
+  { time: '5:30 PM', title: 'Closing Remarks', description: "Celebrate with dinner on your own — see you at NateCon 2027!", type: 'activity' },
 ];
 
 export default function Schedule() {
@@ -271,15 +271,18 @@ export default function Schedule() {
               </Tabs>
             )}
 
-            <div className="mt-12 text-center">
+            <div className="mt-12 text-center space-y-4">
               <Card className="bg-secondary/30 border-border inline-block">
                 <CardContent className="p-6 flex items-center gap-3">
-                  <Coffee className="w-5 h-5 text-primary" />
+                  <Utensils className="w-5 h-5 text-primary" />
                   <span className="text-muted-foreground">
-                    Water, sodas, and snacks available all day, both days
+                    Breakfast, lunch, snacks, and drinks included both days
                   </span>
                 </CardContent>
               </Card>
+              <p className="text-sm text-muted-foreground">
+                Dinner is on your own — enjoy SF's amazing restaurants, grab a burger, whatever you like!
+              </p>
             </div>
           </div>
         </div>

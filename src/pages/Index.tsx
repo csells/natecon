@@ -45,7 +45,7 @@ const eventHighlights = [
   {
     icon: DollarSign,
     title: '$100 for both days',
-    description: 'Includes all meals, snacks, and drinks',
+    description: 'Breakfast, lunch, snacks, and drinks included',
   },
 ];
 

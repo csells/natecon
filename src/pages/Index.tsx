@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { CountdownTimer } from '@/components/CountdownTimer';
@@ -7,6 +8,7 @@ import { TalkDeadlineCountdown } from '@/components/TalkDeadlineCountdown';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Calendar, 
   MapPin, 
@@ -27,7 +29,8 @@ import {
   ChevronRight,
   Scale,
   FileCode,
-  Award
+  Award,
+  Clock
 } from 'lucide-react';
 import natePhoto from '@/assets/nate-photo.webp';
 
@@ -107,6 +110,70 @@ const whatToBring = [
 
 export default function Index() {
   const { user } = useAuth();
+  const [siteMode, setSiteMode] = useState<string>('pre-registration');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSiteMode = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('site_settings')
+          .select('value')
+          .eq('key', 'site_mode')
+          .single();
+
+        if (!error && data) {
+          const mode = JSON.parse(JSON.stringify(data.value));
+          setSiteMode(mode);
+        }
+      } catch (error) {
+        console.error('Error fetching site mode:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSiteMode();
+  }, []);
+
+  // Delayed mode - show minimal page with delay message
+  if (siteMode === 'delayed' && !loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center hero-pattern">
+        <div className="absolute inset-0 bg-gradient-radial from-primary/5 via-transparent to-transparent"></div>
+        
+        <div className="container mx-auto px-4 py-12">
+          <div className="flex flex-col items-center text-center max-w-2xl mx-auto fade-in">
+            {/* Nate's Photo */}
+            <div className="relative mb-8">
+              <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl scale-110 animate-glow-pulse"></div>
+              <img
+                src={natePhoto}
+                alt="Nate Jones"
+                className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 border-primary/30 shadow-2xl"
+              />
+            </div>
+
+            {/* Title */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-8">
+              <span className="text-gradient">NateCon</span>{' '}
+              <span className="text-foreground">2026</span>
+            </h1>
+
+            {/* Delay Icon */}
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-6">
+              <Clock className="w-8 h-8" />
+            </div>
+
+            {/* Delay Message */}
+            <p className="text-xl sm:text-2xl text-foreground leading-relaxed">
+              NateCon 2026 has been delayed while we look for a suitable venue in the San Francisco area. Stay tuned for updates!
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Layout>

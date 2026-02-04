@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Loader2, ArrowLeft, Save } from 'lucide-react';
 
-type SiteMode = 'pre-registration' | 'registration-open' | 'waitlist' | 'post-event';
+type SiteMode = 'pre-registration' | 'registration-open' | 'waitlist' | 'post-event' | 'delayed';
 
 interface SiteSettings {
   site_mode: SiteMode;
@@ -185,6 +185,15 @@ export default function AdminSettings() {
                       <div className="font-medium">Post-Event</div>
                       <div className="text-sm text-muted-foreground">
                         Show wrap-up message and winners
+                      </div>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-secondary/30">
+                    <RadioGroupItem value="delayed" id="delayed" />
+                    <Label htmlFor="delayed" className="flex-1 cursor-pointer">
+                      <div className="font-medium">Delayed</div>
+                      <div className="text-sm text-muted-foreground">
+                        Show delay message, hide all other content
                       </div>
                     </Label>
                   </div>
